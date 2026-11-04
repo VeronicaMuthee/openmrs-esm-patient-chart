@@ -3,6 +3,7 @@ import * as Framework from '@openmrs/esm-framework';
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { esmPatientChartSchema } from './config-schema';
 import { moduleName } from './constants';
+import { withProviderBoundary } from './omnibar-contract';
 import { summaryDashboardMeta, encountersDashboardMeta } from './dashboard.meta';
 import deleteVisitActionButtonComponent from './actions-buttons/delete-visit.component';
 import currentVisitSummaryComponent from './visit/visits-widget/current-visit-summary.extension';
@@ -114,6 +115,15 @@ export const visitAttributeTags = getSyncLifecycle(visitAttributeTagsComponent, 
   featureName: 'visit-attribute-tags',
   moduleName,
 });
+
+// Loaded only when the omnibar mounts its providers, and wrapped so a failure stays in its own group
+export const visitActionsOmnibarProvider = getAsyncLifecycle(
+  () =>
+    import('./omnibar/visit-actions.extension').then(({ default: Provider }) => ({
+      default: withProviderBoundary(Provider, 'visit-actions-omnibar-provider'),
+    })),
+  { featureName: 'visit-actions-omnibar-provider', moduleName },
+);
 
 export const startVisitWorkspace = getAsyncLifecycle(() => import('./visit/visit-form/visit-form.workspace'), {
   featureName: 'start-visit-form',

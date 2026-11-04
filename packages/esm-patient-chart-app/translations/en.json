@@ -115,6 +115,15 @@
   "notes": "Notes",
   "notes__lower": "notes",
   "noVisitTypesToDisplay": "No visit types to display",
+  "omnibarCommand": {
+    "visit": {
+      "aliases": "visit",
+      "description": "Start a visit for this patient",
+      "label": "Visit"
+    }
+  },
+  "omnibarStartVisitSubtitle": "Open the visit form",
+  "omnibarVisitGroup": "Visit",
   "On scheduled date": "On scheduled date",
   "ongoing": "Ongoing",
   "optional": "optional",

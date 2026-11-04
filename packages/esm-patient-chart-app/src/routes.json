@@ -192,6 +192,21 @@
       "name": "retrospective-date-time-picker",
       "slot": "restrospective-date-time-picker-slot",
       "component": "retrospectiveDateTimePicker"
+    },
+    {
+      "name": "visit-actions-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "visitActionsOmnibarProvider",
+      "privileges": ["Add Visits"],
+      "meta": {
+        "lane": "navigate",
+        "scopes": ["patient"],
+        "order": 5,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "visit", "aliases": ["visit"] }
+      }
     }
   ],
   "featureFlags": [
