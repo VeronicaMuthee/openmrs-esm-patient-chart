@@ -73,6 +73,15 @@
   "noResultsForDrugSearch": "No results to display for \"{{searchTerm}}\"",
   "numRefillsErrorMessage": "Number of refills is required",
   "off": "Off",
+  "omnibarCommand": {
+    "order": {
+      "aliases": "order, rx, prescribe",
+      "description": "Order a drug for this patient",
+      "label": "Order"
+    }
+  },
+  "omnibarDrugOrderGroup": "Order a drug",
+  "omnibarDrugOrderSubtitle": "Open the drug order form",
   "on": "On",
   "onDate": "on",
   "orderActionDiscontinue": "Discontinue",

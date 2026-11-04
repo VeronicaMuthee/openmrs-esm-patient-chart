@@ -62,7 +62,7 @@ const drugSearchRepresentation = 'custom:(uuid,display,name,strength,dosageForm:
  */
 export function useDrugSearch(query: string) {
   const { data, ...rest } = useSWRImmutable<FetchResponse<{ results: Array<DrugSearchResult> }>, Error>(
-    query ? `${restBaseUrl}/drug?q=${query}&v=${drugSearchRepresentation}` : null,
+    query ? `${restBaseUrl}/drug?q=${encodeURIComponent(query)}&v=${drugSearchRepresentation}` : null,
     openmrsFetch,
   );
 

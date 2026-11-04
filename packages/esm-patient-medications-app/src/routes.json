@@ -80,6 +80,21 @@
     {
       "name": "drug-search-combobox",
       "component": "drugSearchComboBox"
+    },
+    {
+      "name": "drug-order-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "drugOrderOmnibarProvider",
+      "privileges": ["Add Orders"],
+      "meta": {
+        "lane": "navigate",
+        "scopes": ["patient"],
+        "order": 6,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "order", "aliases": ["order", "rx", "prescribe"] }
+      }
     }
   ],
   "workspaces2": [
