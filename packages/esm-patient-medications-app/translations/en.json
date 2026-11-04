@@ -76,7 +76,7 @@
   "omnibarCommand": {
     "order": {
       "aliases": "order, rx, prescribe",
-      "description": "Order a drug for this patient",
+      "description": "Order a drug or lab test for this patient",
       "label": "Order"
     }
   },

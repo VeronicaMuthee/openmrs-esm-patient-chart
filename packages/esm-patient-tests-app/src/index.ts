@@ -3,6 +3,7 @@ import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { configSchema } from './config-schema';
 import { dashboardMeta } from './test-results/dashboard.meta';
 import { moduleName } from './constants';
+import { withProviderBoundary } from './omnibar-contract';
 import externalOverviewComponent from './test-results/overview/external-overview.extension';
 import resultsViewerComponent from './test-results/results-viewer';
 
@@ -53,4 +54,13 @@ export const timelineResultsModal = getAsyncLifecycle(() => import('./test-resul
 export const editLabResultsModal = getAsyncLifecycle(
   () => import('./edit-test-results/modal/edit-lab-results.modal'),
   options,
+);
+
+// Loaded only when the omnibar mounts its providers, and wrapped so a failure stays in its own group
+export const labOrderOmnibarProvider = getAsyncLifecycle(
+  () =>
+    import('./omnibar/lab-order.extension').then(({ default: Provider }) => ({
+      default: withProviderBoundary(Provider, 'lab-order-omnibar-provider'),
+    })),
+  { featureName: 'lab-order-omnibar-provider', moduleName },
 );

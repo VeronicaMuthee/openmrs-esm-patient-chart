@@ -35,6 +35,21 @@
       "component": "labOrderPanel",
       "slots": ["order-basket-slot", "result-order-basket-slot"],
       "order": 2
+    },
+    {
+      "name": "lab-order-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "labOrderOmnibarProvider",
+      "privileges": ["Add Orders"],
+      "meta": {
+        "lane": "navigate",
+        "scopes": ["patient"],
+        "order": 8,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "order", "aliases": ["order", "rx", "prescribe"] }
+      }
     }
   ],
   "modals": [

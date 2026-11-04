@@ -47,6 +47,15 @@
   "noResultsToDisplay": "No results to display",
   "noTestResultsWithinSpecifiedRange": "No test results found within the specified range",
   "observationsDisplayText": "observations",
+  "omnibarCommand": {
+    "order": {
+      "aliases": "order, rx, prescribe",
+      "description": "Order a drug or lab test for this patient",
+      "label": "Order"
+    }
+  },
+  "omnibarLabOrderGroup": "Order a lab test",
+  "omnibarLabOrderSubtitle": "Lab test · Open the lab order form",
   "onDate": "on",
   "or": "or",
   "orderActionDiscontinue": "Discontinue",

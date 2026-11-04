@@ -7,7 +7,7 @@ import { type ConfigObject } from '../config-schema';
 
 /* The omnibar reads the /order command's texts from this module's translations:
  * t('omnibarCommand.order.label', 'Order')
- * t('omnibarCommand.order.description', 'Order a drug for this patient')
+ * t('omnibarCommand.order.description', 'Order a drug or lab test for this patient')
  * t('omnibarCommand.order.aliases', 'order, rx, prescribe')
  */
 
