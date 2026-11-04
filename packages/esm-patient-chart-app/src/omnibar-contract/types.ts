@@ -152,6 +152,17 @@ export type OmnibarTarget =
         workspaceName: string;
         patientUuid: string;
       };
+    }
+  | {
+      /** New in v1. Older hosts drop a result with this target. */
+      type: 'modal';
+      /** A modal registered in an app's `routes.json` `modals`, opened with `showModal`. */
+      modalName: string;
+      /**
+       * The modal's props. The host adds `closeModal`. As for a workspace, inside a chart the modal is
+       * refused when a string `patientUuid` in them names another patient than the chart's.
+       */
+      modalProps?: object;
     };
 
 /**

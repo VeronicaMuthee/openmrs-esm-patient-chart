@@ -115,10 +115,11 @@
   "notes": "Notes",
   "notes__lower": "notes",
   "noVisitTypesToDisplay": "No visit types to display",
+  "omnibarActiveVisitSubtitle": "{{visitType}} · started {{startDate}}",
   "omnibarCommand": {
     "visit": {
       "aliases": "visit",
-      "description": "Start a visit for this patient",
+      "description": "Start or end a visit for this patient",
       "label": "Visit"
     }
   },

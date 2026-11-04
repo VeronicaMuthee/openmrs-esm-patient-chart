@@ -1,44 +1,58 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePatient, useVisit } from '@openmrs/esm-framework';
+import { formatDatetime, parseDate, usePatient, useVisit } from '@openmrs/esm-framework';
 import { isServerUnreachable, type OmnibarProviderProps, type OmnibarResult } from '../omnibar-contract';
 
 /* The omnibar reads the /visit command's texts from this module's translations:
  * t('omnibarCommand.visit.label', 'Visit')
- * t('omnibarCommand.visit.description', 'Start a visit for this patient')
+ * t('omnibarCommand.visit.description', 'Start or end a visit for this patient')
  * t('omnibarCommand.visit.aliases', 'visit')
  */
 
 const startWords = ['start', 'new', 'begin', 'add', 'open'];
+const endWords = ['end', 'stop', 'close', 'finish'];
+
+export type VisitIntent = 'start' | 'end' | 'either';
 
 /**
- * Whether the query asks to start a visit. Under `/visit`, an empty query or a start word does;
- * as plain text the query must also name a visit, so "start" alone stays with other providers.
+ * What a query asks of the visit. Under `/visit` an empty query asks for either; as plain text the
+ * query must name a visit ("visit" alone asks for either), so "start" or "end" alone stays with
+ * other providers.
  */
-export function asksToStartVisit(query: string, underVisitCommand: boolean) {
+export function readVisitIntent(query: string, underVisitCommand: boolean): VisitIntent | null {
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  const hasStartWord = words.some((word) => startWords.some((start) => start.startsWith(word)));
-  if (underVisitCommand) {
-    return words.length === 0 || hasStartWord;
+  const matches = (list: Array<string>) => words.some((word) => list.some((listWord) => listWord.startsWith(word)));
+  if (!underVisitCommand) {
+    const namesVisit = words.some((word) => word.length >= 3 && 'visit'.startsWith(word));
+    if (!namesVisit) {
+      return null;
+    }
+    if (words.length === 1) {
+      return 'either';
+    }
+  } else if (words.length === 0) {
+    return 'either';
   }
-  const namesVisit = words.some((word) => word.length >= 3 && 'visit'.startsWith(word));
-  return namesVisit && (words.length === 1 || hasStartWord);
+  const start = matches(startWords);
+  const end = matches(endWords);
+  return start && end ? 'either' : start ? 'start' : end ? 'end' : null;
 }
 
 /**
- * Omnibar provider (see `omnibar-contract`) that offers to start a visit for the chart's patient. It opens
- * the same visit form, with the same props, as the patient banner's "Add visit" (`launchStartVisitWorkspace`).
+ * Omnibar provider (see `omnibar-contract`) that offers to start a visit for the chart's patient, or to
+ * end the active one. Starting opens the same visit form, with the same props, as the patient banner's
+ * "Add visit" (`launchStartVisitWorkspace`); ending opens the banner's own "End active visit" dialog.
  */
 const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, context, report }) => {
   const { t } = useTranslation();
   const { patientUuid } = context;
-  const wanted = Boolean(patientUuid) && asksToStartVisit(query, context.command?.id === 'visit');
+  const intent = patientUuid ? readVisitIntent(query, context.command?.id === 'visit') : null;
   const { patient, isLoading: isLoadingPatient, error: patientError } = usePatient(patientUuid);
   const { activeVisit, isLoading: isLoadingVisit, error: visitError } = useVisit(patientUuid);
   const title = t('omnibarVisitGroup', 'Visit');
 
   useEffect(() => {
-    if (!wanted) {
+    if (!intent) {
       report({ query, title, status: 'idle' });
       return;
     }
@@ -57,10 +71,10 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
       return;
     }
 
+    const results: Array<OmnibarResult> = [];
     // Same rules as the banner's "Add visit": not for a deceased patient, and the visit form refuses a
     // second active visit anyway.
-    const results: Array<OmnibarResult> = [];
-    if (!activeVisit && !patient?.deceasedDateTime) {
+    if (intent !== 'end' && !activeVisit && !patient?.deceasedDateTime) {
       const windowProps = { patient, patientUuid, visitContext: null };
       results.push({
         id: 'start-visit',
@@ -77,9 +91,21 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
         },
       });
     }
+    if (intent !== 'start' && activeVisit) {
+      results.push({
+        id: 'end-visit',
+        title: t('endActiveVisit', 'End active visit'),
+        subtitle: t('omnibarActiveVisitSubtitle', '{{visitType}} · started {{startDate}}', {
+          visitType: activeVisit.visitType?.display,
+          startDate: formatDatetime(parseDate(activeVisit.startDatetime)),
+        }),
+        // The banner's own "End active visit" confirmation, opened as the banner opens it
+        target: { type: 'modal', modalName: 'end-visit-dialog', modalProps: { patientUuid } },
+      });
+    }
     report({ query, title, status: 'ready', results });
   }, [
-    wanted,
+    intent,
     query,
     title,
     report,

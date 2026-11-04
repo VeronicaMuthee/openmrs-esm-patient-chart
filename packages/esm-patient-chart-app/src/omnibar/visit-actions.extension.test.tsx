@@ -5,7 +5,7 @@ import { usePatient, useVisit } from '@openmrs/esm-framework';
 import { mockCurrentVisit } from '__mocks__';
 import { mockPatient } from 'tools';
 import { type OmnibarContext, type OmnibarReport } from '../omnibar-contract';
-import VisitActionsOmnibarProvider, { asksToStartVisit } from './visit-actions.extension';
+import VisitActionsOmnibarProvider, { readVisitIntent } from './visit-actions.extension';
 
 const mockUsePatient = vi.mocked(usePatient);
 const mockUseVisit = vi.mocked(useVisit);
@@ -19,23 +19,30 @@ function reportFor(query: string, context: OmnibarContext = chartContext) {
   return report.mock.calls.at(-1)[0];
 }
 
-describe('asksToStartVisit', () => {
+describe('readVisitIntent', () => {
   it.each([
-    ['', true, true],
-    ['start', true, true],
-    ['st', true, true],
-    ['new', true, true],
-    ['end', true, false],
-    ['visit', false, true],
-    ['start visit', false, true],
-    ['new visit', false, true],
-    ['start a vis', false, true],
-    ['start', false, false],
-    ['visit notes', false, false],
-    ['vi', false, false],
-    ['', false, false],
+    ['', true, 'either'],
+    ['start', true, 'start'],
+    ['st', true, 'either'],
+    ['new', true, 'start'],
+    ['end', true, 'end'],
+    ['stop', true, 'end'],
+    ['s', true, 'either'],
+    ['notes', true, null],
+    ['visit', false, 'either'],
+    ['start visit', false, 'start'],
+    ['new visit', false, 'start'],
+    ['start a vis', false, 'start'],
+    ['end visit', false, 'end'],
+    ['stop visit', false, 'end'],
+    ['close the visit', false, 'end'],
+    ['start', false, null],
+    ['end', false, null],
+    ['visit notes', false, null],
+    ['vi', false, null],
+    ['', false, null],
   ])('reads %j (under /visit: %s) as %s', (query, underVisitCommand, expected) => {
-    expect(asksToStartVisit(query, underVisitCommand)).toBe(expected);
+    expect(readVisitIntent(query, underVisitCommand)).toBe(expected);
   });
 });
 
@@ -76,12 +83,33 @@ describe('VisitActionsOmnibarProvider', () => {
     expect(reportFor('weight')).toEqual({ query: 'weight', title: 'Visit', status: 'idle' });
   });
 
-  it('offers nothing while the patient has an active visit', () => {
+  it('offers no start while the patient has an active visit', () => {
     mockUseVisit.mockReturnValue({ activeVisit: mockCurrentVisit, isLoading: false, error: null } as ReturnType<
       typeof useVisit
     >);
 
     expect(reportFor('start visit')).toMatchObject({ status: 'ready', results: [] });
+  });
+
+  it('offers to end the active visit under /visit, opening the banner’s dialog for this patient only', () => {
+    mockUseVisit.mockReturnValue({ activeVisit: mockCurrentVisit, isLoading: false, error: null } as ReturnType<
+      typeof useVisit
+    >);
+
+    const report = reportFor('', { ...chartContext, command: { id: 'visit' } });
+
+    expect(report.results).toHaveLength(1);
+    expect(report.results[0]).toMatchObject({ id: 'end-visit', title: 'End active visit' });
+    expect(report.results[0].subtitle).toMatch(/^Facility Visit · started /);
+    expect(report.results[0].target).toEqual({
+      type: 'modal',
+      modalName: 'end-visit-dialog',
+      modalProps: { patientUuid },
+    });
+  });
+
+  it('offers no end without an active visit', () => {
+    expect(reportFor('end visit')).toMatchObject({ status: 'ready', results: [] });
   });
 
   it('offers nothing for a deceased patient', () => {
