@@ -61,6 +61,23 @@
   "noResultsForTestTypeSearch": "No results to display for \"{{searchTerm}}\"",
   "notApplicable": "N/A",
   "noTestData": "No test data available",
+  "omnibarCommand": {
+    "pending": {
+      "aliases": "pending, unfilled",
+      "description": "Lab orders not yet completed for this patient",
+      "label": "Pending"
+    }
+  },
+  "omnibarLabStatusException": "Exception",
+  "omnibarLabStatusInProgress": "In progress",
+  "omnibarLabStatusNotReceived": "Not yet received",
+  "omnibarLabStatusOnHold": "On hold",
+  "omnibarLabStatusReceived": "Received",
+  "omnibarNoPendingLabs": "No pending lab orders",
+  "omnibarOpenOrdersPage": "Open the Orders page",
+  "omnibarOrderedOn": "Ordered {{date}}",
+  "omnibarPendingLabsGroup": "Pending lab orders",
+  "omnibarStat": "STAT",
   "onDate": "on",
   "or": "or",
   "order": "Order",

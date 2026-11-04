@@ -70,6 +70,21 @@
       "name": "drug-order-pin-action",
       "component": "drugOrderPinAction",
       "slot": "drug-order-form-actions-slot"
+    },
+    {
+      "name": "pending-labs-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "pendingLabsOmnibarProvider",
+      "privileges": ["Get Orders"],
+      "meta": {
+        "lane": "record",
+        "scopes": ["patient"],
+        "order": 25,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "pending", "aliases": ["pending", "unfilled"] }
+      }
     }
   ],
   "workspaces2": [

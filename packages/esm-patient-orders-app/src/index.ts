@@ -2,6 +2,7 @@ import { defineConfigSchema, getAsyncLifecycle, getSyncLifecycle } from '@openmr
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { configSchema } from './config-schema';
 import { ordersDashboardMeta } from './dashboard.meta';
+import { withProviderBoundary } from './omnibar-contract';
 import OrdersSummary from './orders-summary/orders-summary.component';
 
 export const importTranslation = require.context('../translations', false, /.json$/, 'lazy');
@@ -89,4 +90,13 @@ export const drugOrderPinAction = getAsyncLifecycle(
 export const drugFavoritesListExtension = getAsyncLifecycle(
   () => import('./order-favorites/drug-favorites-list.component'),
   options,
+);
+
+// Loaded only when the omnibar mounts its providers, and wrapped so a failure stays in its own group
+export const pendingLabsOmnibarProvider = getAsyncLifecycle(
+  () =>
+    import('./omnibar/pending-labs.extension').then(({ default: Provider }) => ({
+      default: withProviderBoundary(Provider, 'pending-labs-omnibar-provider'),
+    })),
+  { featureName: 'pending-labs-omnibar-provider', moduleName },
 );
