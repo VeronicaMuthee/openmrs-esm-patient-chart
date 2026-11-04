@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   launchWorkspace2,
   navigate,
@@ -7,7 +7,11 @@ import {
   type Visit,
   type Workspace2DefinitionProps,
 } from '@openmrs/esm-framework';
-import { getPatientChartStoreState, usePatientChartStore } from './store/patient-chart-store';
+import {
+  getPatientChartStoreState,
+  usePatientChartStore,
+  whenWorkspaceGroupHasVisit,
+} from './store/patient-chart-store';
 import { useSystemVisitSetting } from './useSystemVisitSetting';
 
 export interface PatientWorkspaceGroupProps {
@@ -246,29 +250,18 @@ export function useActionMenuButtonLaunchProps<T extends object>(
 }
 
 export function useStartVisitIfNeeded(patientUuid: string) {
-  const { visitContext, workspaceGroupVisitUuid } = usePatientChartStore(patientUuid);
+  const { visitContext } = usePatientChartStore(patientUuid);
   const { systemVisitEnabled } = useSystemVisitSetting();
-  // Setting a new visit context makes the patient chart relaunch its workspace group, which closes
-  // any workspace opened before the relaunch. So a pending prompt resolves only once the workspace
-  // group has the new visit context.
-  const pendingPromptResolvers = useRef<Array<() => void>>([]);
-
-  useEffect(() => {
-    if (visitContext && workspaceGroupVisitUuid === visitContext.uuid) {
-      const resolvers = pendingPromptResolvers.current;
-      pendingPromptResolvers.current = [];
-      resolvers.forEach((resolvePrompt) => resolvePrompt());
-    }
-  }, [visitContext, workspaceGroupVisitUuid]);
 
   const startVisitIfNeeded = useCallback(async (): Promise<boolean> => {
     if (!systemVisitEnabled || visitContext) {
       return true;
     } else {
       return new Promise<boolean>((resolve) => {
-        const resolveOnceWorkspaceGroupHasVisit = () => {
-          pendingPromptResolvers.current.push(() => resolve(true));
-        };
+        // Setting a new visit context makes the patient chart relaunch its workspace group, which closes
+        // any workspace opened before the relaunch, possibly the one that asked. So a started visit
+        // resolves only once the workspace group has it, waiting on the store rather than on the caller.
+        const resolveOnceWorkspaceGroupHasVisit = () => whenWorkspaceGroupHasVisit(patientUuid, () => resolve(true));
 
         const dispose = showModal('start-visit-dialog', {
           closeModal: () => dispose(),

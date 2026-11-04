@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@carbon/react';
 import {
   ExtensionSlot,
+  launchWorkspace2,
   SearchIcon,
   ListCheckedIcon,
   showSnackbar,
@@ -14,10 +15,14 @@ import {
 } from '@openmrs/esm-framework';
 import {
   type DrugOrderBasketItem,
+  getPatientChartWindowProps,
   postOrder,
   showOrderSuccessToast,
   useMutatePatientOrders,
   useOrderBasket,
+  usePatientChartStore,
+  useStartVisitIfNeeded,
+  useSystemVisitSetting,
   WorkspaceBackButton,
 } from '@openmrs/esm-patient-common-lib';
 
@@ -86,6 +91,37 @@ const AddDrugOrder: React.FC<AddDrugOrderProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const isEditingExistingOrder = currentOrder?.action === 'REVISE' || initialOrder != null;
   const { mutate: mutateOrders } = useMutatePatientOrders(patientUuid);
+
+  // Ordering needs a visit. The chart's own order buttons ask for one before opening this form; a launcher
+  // that can't (the omnibar) opens it directly, so the form asks itself, with the same prompt. The chart
+  // store answers only for the patient the chart has open, so outside the chart (the ward, which supplies
+  // its own visit) it never asks. Starting a visit relaunches the chart's workspace group, which closes
+  // this form, so the form is opened again as it was once the group has the visit.
+  const startVisitIfNeeded = useStartVisitIfNeeded(patientUuid);
+  const { systemVisitEnabled } = useSystemVisitSetting();
+  const { patientUuid: chartPatientUuid } = usePatientChartStore(patientUuid);
+  const needsVisit =
+    systemVisitEnabled &&
+    Boolean(patientUuid) &&
+    chartPatientUuid === patientUuid &&
+    !visitContext &&
+    initialOrder?.action !== 'REVISE';
+  const askedForVisit = useRef(false);
+
+  useEffect(() => {
+    if (!needsVisit || askedForVisit.current) {
+      return;
+    }
+    askedForVisit.current = true;
+    const orderToReopen = currentOrder ? { ...currentOrder, visit: null } : undefined;
+    startVisitIfNeeded().then((hasVisit) => {
+      if (hasVisit) {
+        launchWorkspace2('add-drug-order', { order: orderToReopen }, getPatientChartWindowProps(patientUuid));
+      } else {
+        closeWorkspace({ discardUnsavedChanges: true });
+      }
+    });
+  }, [needsVisit, currentOrder, startVisitIfNeeded, patientUuid, closeWorkspace]);
 
   const { drugCategoryConceptSets } = useConfig<ConfigObject>();
 

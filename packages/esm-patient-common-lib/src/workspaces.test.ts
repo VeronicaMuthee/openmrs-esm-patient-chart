@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { launchWorkspace2, showModal, useLayoutType, type Visit } from '@openmrs/esm-framework';
-import { setPatientChartWorkspaceGroupVisitUuid, usePatientChartStore } from './store/patient-chart-store';
+import {
+  setPatientChartWorkspaceGroupVisitUuid,
+  usePatientChartStore,
+  whenWorkspaceGroupHasVisit,
+} from './store/patient-chart-store';
 import { useSystemVisitSetting } from './useSystemVisitSetting';
 import {
   getPatientAndVisitProps,
@@ -130,6 +134,90 @@ describe('useStartVisitIfNeeded', () => {
 
     await expect(first).resolves.toBe(true);
     await expect(second).resolves.toBe(true);
+  });
+
+  it('still resolves a started visit after the component that asked has unmounted', async () => {
+    const { result, unmount } = renderHook(() => ({
+      store: usePatientChartStore(patient.id),
+      startVisitIfNeeded: useStartVisitIfNeeded(patient.id),
+    }));
+    act(() => result.current.store.setPatient(patient));
+
+    let promise: Promise<boolean>;
+    act(() => {
+      promise = result.current.startVisitIfNeeded();
+    });
+    const settlement = trackSettlement(promise);
+    const { onVisitStarted } = getModalProps('start-visit-dialog');
+    const { setVisitContext } = result.current.store;
+
+    // The chart relaunching its workspace group closes the workspace that asked
+    unmount();
+    await act(async () => {
+      setVisitContext(visit);
+      onVisitStarted();
+    });
+    await act(async () => setPatientChartWorkspaceGroupVisitUuid(visit.uuid));
+
+    expect(settlement).toEqual({ settled: true, value: true });
+  });
+});
+
+describe('whenWorkspaceGroupHasVisit', () => {
+  afterEach(() => {
+    const { result } = renderHook(() => usePatientChartStore(patient.id));
+    act(() => {
+      result.current.setVisitContext(null);
+      result.current.setPatient(null);
+      setPatientChartWorkspaceGroupVisitUuid(null);
+    });
+  });
+
+  function openChart() {
+    const { result } = renderHook(() => usePatientChartStore(patient.id));
+    act(() => result.current.setPatient(patient));
+    return result;
+  }
+
+  it('runs at once when the workspace group already has the visit', () => {
+    const store = openChart();
+    act(() => {
+      store.current.setVisitContext(visit);
+      setPatientChartWorkspaceGroupVisitUuid(visit.uuid);
+    });
+    const callback = vi.fn();
+
+    whenWorkspaceGroupHasVisit(patient.id, callback);
+
+    expect(callback).toHaveBeenCalledOnce();
+  });
+
+  it('runs once the workspace group has been relaunched with the visit, and only once', () => {
+    const store = openChart();
+    const callback = vi.fn();
+
+    whenWorkspaceGroupHasVisit(patient.id, callback);
+    act(() => store.current.setVisitContext(visit));
+    expect(callback).not.toHaveBeenCalled();
+
+    act(() => setPatientChartWorkspaceGroupVisitUuid(visit.uuid));
+    act(() => setPatientChartWorkspaceGroupVisitUuid(visit.uuid));
+    expect(callback).toHaveBeenCalledOnce();
+  });
+
+  it('gives up when the chart moves to another patient first', () => {
+    const store = openChart();
+    const callback = vi.fn();
+
+    whenWorkspaceGroupHasVisit(patient.id, callback);
+    act(() => store.current.setPatient({ id: 'another-patient' } as fhir.Patient));
+    act(() => {
+      store.current.setPatient(patient);
+      store.current.setVisitContext(visit);
+      setPatientChartWorkspaceGroupVisitUuid(visit.uuid);
+    });
+
+    expect(callback).not.toHaveBeenCalled();
   });
 });
 

@@ -68,6 +68,32 @@ export function getPatientChartStoreState(patientUuid?: string): PatientChartSto
 }
 
 /**
+ * Runs `callback` once the patient chart has a visit context and its workspace group has been relaunched
+ * with it, which is when a workspace launched into the group gets that visit. Waits on the store, not on
+ * a component, so it still runs after the relaunch has unmounted whoever asked. Gives up if the chart
+ * moves to another patient first.
+ */
+export function whenWorkspaceGroupHasVisit(patientUuid: string, callback: () => void) {
+  const groupHasVisit = (state: PatientChartStore) =>
+    state.patientUuid === patientUuid &&
+    Boolean(state.visitContext) &&
+    state.workspaceGroupVisitUuid === state.visitContext.uuid;
+
+  if (groupHasVisit(patientChartStore.getState())) {
+    callback();
+    return;
+  }
+  const unsubscribe = patientChartStore.subscribe((state) => {
+    if (groupHasVisit(state)) {
+      unsubscribe();
+      callback();
+    } else if (state.patientUuid !== patientUuid) {
+      unsubscribe();
+    }
+  });
+}
+
+/**
  * Hook to access the values and sets of the patient chart store.
  * Note: This hooks SHOULD only be used by components inside the patient chart app.
  *
