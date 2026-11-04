@@ -72,6 +72,15 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
     }
 
     const results: Array<OmnibarResult> = [];
+    const visitsPage = { type: 'navigate' as const, to: `\${openmrsSpaBase}/patient/${patientUuid}/chart/visits` };
+    const activeVisitSubtitle =
+      activeVisit &&
+      t('omnibarActiveVisitSubtitle', '{{visitType}} · started {{startDate}}', {
+        visitType: activeVisit.visitType?.display,
+        startDate: formatDatetime(parseDate(activeVisit.startDatetime)),
+        // The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/"
+        interpolation: { escapeValue: false },
+      });
     // Same rules as the banner's "Add visit": not for a deceased patient, and the visit form refuses a
     // second active visit anyway.
     if (intent !== 'end' && !activeVisit && !patient?.deceasedDateTime) {
@@ -95,14 +104,27 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
       results.push({
         id: 'end-visit',
         title: t('endActiveVisit', 'End active visit'),
-        subtitle: t('omnibarActiveVisitSubtitle', '{{visitType}} · started {{startDate}}', {
-          visitType: activeVisit.visitType?.display,
-          startDate: formatDatetime(parseDate(activeVisit.startDatetime)),
-          // The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/"
-          interpolation: { escapeValue: false },
-        }),
+        subtitle: activeVisitSubtitle,
         // The banner's own "End active visit" confirmation, opened as the banner opens it
         target: { type: 'modal', modalName: 'end-visit-dialog', modalProps: { patientUuid } },
+      });
+    }
+    // Asked for what the visit can't do just now: say so, as /pending does when nothing is pending, rather
+    // than leave the bar's "Nothing matches". Starting never offers to end the visit that is in the way.
+    if (intent === 'end' && !activeVisit) {
+      results.push({
+        id: 'no-active-visit',
+        title: t('omnibarNoActiveVisit', 'No active visit to end'),
+        subtitle: t('omnibarOpenVisitsPage', 'Open the Visits page'),
+        target: visitsPage,
+      });
+    }
+    if (intent === 'start' && activeVisit) {
+      results.push({
+        id: 'visit-already-active',
+        title: t('omnibarVisitAlreadyActive', 'A visit is already active'),
+        subtitle: activeVisitSubtitle,
+        target: visitsPage,
       });
     }
     report({ query, title, status: 'ready', results });

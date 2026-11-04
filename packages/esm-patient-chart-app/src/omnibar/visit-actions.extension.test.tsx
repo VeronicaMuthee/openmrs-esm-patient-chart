@@ -83,12 +83,21 @@ describe('VisitActionsOmnibarProvider', () => {
     expect(reportFor('weight')).toEqual({ query: 'weight', title: 'Visit', status: 'idle' });
   });
 
-  it('offers no start while the patient has an active visit', () => {
+  it('says a visit is already active, rather than offer a start, opening the Visits page', () => {
     mockUseVisit.mockReturnValue({ activeVisit: mockCurrentVisit, isLoading: false, error: null } as ReturnType<
       typeof useVisit
     >);
 
-    expect(reportFor('start visit')).toMatchObject({ status: 'ready', results: [] });
+    const report = reportFor('start visit');
+
+    expect(report.status).toBe('ready');
+    expect(report.results).toHaveLength(1);
+    expect(report.results[0]).toMatchObject({ id: 'visit-already-active', title: 'A visit is already active' });
+    expect(report.results[0].subtitle).toMatch(/^Facility Visit · started /);
+    expect(report.results[0].target).toEqual({
+      type: 'navigate',
+      to: `\${openmrsSpaBase}/patient/${patientUuid}/chart/visits`,
+    });
   });
 
   it('offers to end the active visit under /visit, opening the banner’s dialog for this patient only', () => {
@@ -108,8 +117,32 @@ describe('VisitActionsOmnibarProvider', () => {
     });
   });
 
-  it('offers no end without an active visit', () => {
-    expect(reportFor('end visit')).toMatchObject({ status: 'ready', results: [] });
+  it('says there is no visit to end, opening the Visits page', () => {
+    expect(reportFor('end visit')).toEqual({
+      query: 'end visit',
+      title: 'Visit',
+      status: 'ready',
+      results: [
+        {
+          id: 'no-active-visit',
+          title: 'No active visit to end',
+          subtitle: 'Open the Visits page',
+          target: { type: 'navigate', to: `\${openmrsSpaBase}/patient/${patientUuid}/chart/visits` },
+        },
+      ],
+    });
+  });
+
+  it('offers only the start for "visit" with no active visit', () => {
+    expect(reportFor('visit').results.map((result) => result.id)).toEqual(['start-visit']);
+  });
+
+  it('offers only the end for "visit" with an active visit', () => {
+    mockUseVisit.mockReturnValue({ activeVisit: mockCurrentVisit, isLoading: false, error: null } as ReturnType<
+      typeof useVisit
+    >);
+
+    expect(reportFor('visit').results.map((result) => result.id)).toEqual(['end-visit']);
   });
 
   it('offers nothing for a deceased patient', () => {
