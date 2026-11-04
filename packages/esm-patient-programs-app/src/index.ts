@@ -2,6 +2,7 @@ import { defineConfigSchema, getAsyncLifecycle, getSyncLifecycle } from '@openmr
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { configSchema } from './config-schema';
 import { dashboardMeta } from './dashboard.meta';
+import { withProviderBoundary } from './omnibar-contract';
 import programsOverviewComponent from './programs/programs-overview.component';
 import programsDetailedSummaryComponent from './programs/programs-detailed-summary.component';
 
@@ -37,4 +38,13 @@ export const programsFormWorkspace = getAsyncLifecycle(() => import('./programs/
 export const deleteProgramConfirmationModal = getAsyncLifecycle(
   () => import('./programs/delete-program.modal'),
   options,
+);
+
+// Loaded only when the omnibar mounts its providers, and wrapped so a failure stays in its own group
+export const enrollOmnibarProvider = getAsyncLifecycle(
+  () =>
+    import('./omnibar/enroll.extension').then(({ default: Provider }) => ({
+      default: withProviderBoundary(Provider, 'enroll-omnibar-provider'),
+    })),
+  { featureName: 'enroll-omnibar-provider', moduleName },
 );

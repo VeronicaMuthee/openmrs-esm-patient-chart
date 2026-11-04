@@ -280,6 +280,14 @@ describe('ProgramsForm', () => {
 
     expect(screen.getByLabelText(/program status/i)).toBeInTheDocument();
   });
+
+  it('pre-selects the program it was opened with for a new enrollment', () => {
+    const oncologyScreeningProgramUuid = '11b129ca-a5e7-4025-84bf-b92a173e20de';
+
+    render(<ProgramsForm {...testProps} workspaceProps={{ programUuid: oncologyScreeningProgramUuid }} />);
+
+    expect(screen.getByRole('combobox', { name: /program name/i })).toHaveValue(oncologyScreeningProgramUuid);
+  });
 });
 
 function renderProgramsForm(programEnrollmentUuidToEdit?: string) {

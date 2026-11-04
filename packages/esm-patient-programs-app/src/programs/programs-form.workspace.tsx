@@ -44,6 +44,8 @@ import styles from './programs-form.scss';
 
 export interface ProgramsFormProps {
   programEnrollmentId?: string;
+  /** Pre-selects this program for a new enrollment, as the omnibar's /enroll does. Ignored when editing. */
+  programUuid?: string;
 }
 
 const createProgramsFormSchema = (t: TFunction) =>
@@ -77,7 +79,7 @@ export type ProgramsFormData = z.infer<ReturnType<typeof createProgramsFormSchem
 const ProgramsForm: React.FC<PatientWorkspace2DefinitionProps<ProgramsFormProps, {}>> = ({
   closeWorkspace,
   groupProps,
-  workspaceProps: { programEnrollmentId },
+  workspaceProps: { programEnrollmentId, programUuid },
 }) => {
   const { patient, patientUuid } = groupProps;
   const { t } = useTranslation();
@@ -124,7 +126,7 @@ const ProgramsForm: React.FC<PatientWorkspace2DefinitionProps<ProgramsFormProps,
     mode: 'all',
     resolver: zodResolver(programsFormSchema),
     defaultValues: {
-      selectedProgram: currentEnrollment?.program.uuid ?? '',
+      selectedProgram: currentEnrollment?.program.uuid ?? (inEditMode ? '' : programUuid ?? ''),
       enrollmentDate: currentEnrollment?.dateEnrolled ? parseDate(currentEnrollment.dateEnrolled) : new Date(),
       completionDate: currentEnrollment?.dateCompleted ? parseDate(currentEnrollment.dateCompleted) : null,
       enrollmentLocation: getLocationUuid() ?? '',

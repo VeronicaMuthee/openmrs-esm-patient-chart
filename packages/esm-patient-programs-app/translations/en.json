@@ -29,6 +29,17 @@
   "location": "Location",
   "noEligibleEnrollments": "There are no more programs left to enroll this patient in",
   "noProgramsConfigured": "No programs configured",
+  "omnibarCommand": {
+    "enroll": {
+      "aliases": "enroll, enrol",
+      "description": "Enroll this patient in a program",
+      "label": "Enroll"
+    }
+  },
+  "omnibarEnrolledSince": "Enrolled since {{date}}",
+  "omnibarEnrollGroup": "Programs",
+  "omnibarEnrollIn": "Enroll in {{program}}",
+  "omnibarOpenEnrollmentForm": "Open the program enrollment form",
   "programEnrollmentDeleted": "Program enrollment deleted",
   "programEnrollmentSaveError": "Error saving program enrollment",
   "programEnrollmentsLower": "program enrollments",

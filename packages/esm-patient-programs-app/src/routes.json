@@ -27,6 +27,21 @@
         "path": "programs"
       },
       "order": 10
+    },
+    {
+      "name": "enroll-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "enrollOmnibarProvider",
+      "privileges": ["Add Patient Programs"],
+      "meta": {
+        "lane": "navigate",
+        "scopes": ["patient"],
+        "order": 7,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "enroll", "aliases": ["enroll", "enrol"] }
+      }
     }
   ],
   "pages": [],
