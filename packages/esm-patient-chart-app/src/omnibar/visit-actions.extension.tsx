@@ -98,6 +98,8 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
         subtitle: t('omnibarActiveVisitSubtitle', '{{visitType}} · started {{startDate}}', {
           visitType: activeVisit.visitType?.display,
           startDate: formatDatetime(parseDate(activeVisit.startDatetime)),
+          // The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/"
+          interpolation: { escapeValue: false },
         }),
         // The banner's own "End active visit" confirmation, opened as the banner opens it
         target: { type: 'modal', modalName: 'end-visit-dialog', modalProps: { patientUuid } },

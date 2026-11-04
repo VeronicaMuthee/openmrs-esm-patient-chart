@@ -16,6 +16,16 @@ vi.mock('../programs/programs.resource', () => ({
   useEnrollments: vi.fn(),
 }));
 
+// A real i18next, which HTML-escapes interpolated values by default as the app's does; the shared
+// react-i18next mock only substitutes them.
+vi.mock('react-i18next', async () => {
+  const { default: i18next } = await import('i18next');
+  const i18n = i18next.createInstance();
+  await i18n.init({ lng: 'en', resources: {} });
+  const t = i18n.t.bind(i18n);
+  return { useTranslation: () => ({ t, i18n }) };
+});
+
 const patientUuid = mockPatient.id;
 const chartContext: OmnibarContext = { scope: 'patient', patientUuid, locale: 'en' };
 const underEnroll: OmnibarContext = { ...chartContext, command: { id: 'enroll' } };
@@ -93,6 +103,16 @@ describe('EnrollOmnibarProvider', () => {
     expect(result).toMatchObject({ title: 'HIV Care and Treatment' });
     expect(result.subtitle).toMatch(/^Enrolled since /);
     expect(result.target).toMatchObject({ workspaceProps: { programEnrollmentId: 'enrollment' } });
+  });
+
+  it('shows a program’s name as written, without HTML-escaping it', () => {
+    mockUseAvailablePrograms.mockReturnValue({
+      data: [{ ...hivCare, uuid: 'prep', display: 'HIV Preventative Services (PEP/PrEP)' }],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAvailablePrograms>);
+
+    expect(reportFor('prep').results[0].title).toBe('Enroll in HIV Preventative Services (PEP/PrEP)');
   });
 
   it('lists every program for /enroll with nothing after it', () => {

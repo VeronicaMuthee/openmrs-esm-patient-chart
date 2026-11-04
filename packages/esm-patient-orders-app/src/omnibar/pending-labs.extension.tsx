@@ -82,7 +82,11 @@ const PendingLabsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, con
           id: order.uuid,
           title: order.concept?.display ?? order.display,
           subtitle: [
-            t('omnibarOrderedOn', 'Ordered {{date}}', { date: formatDate(parseDate(order.dateActivated)) }),
+            // The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/"
+            t('omnibarOrderedOn', 'Ordered {{date}}', {
+              date: formatDate(parseDate(order.dateActivated)),
+              interpolation: { escapeValue: false },
+            }),
             order.fulfillerStatus
               ? statusLabels[order.fulfillerStatus] ?? order.fulfillerStatus
               : t('omnibarLabStatusNotReceived', 'Not yet received'),

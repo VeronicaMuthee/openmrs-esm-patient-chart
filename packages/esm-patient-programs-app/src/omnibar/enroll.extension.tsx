@@ -11,6 +11,9 @@ import { type Program } from '../types';
  * t('omnibarCommand.enroll.aliases', 'enroll, enrol')
  */
 
+// The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/" in a name
+const plainText = { escapeValue: false };
+
 const enrollWords = ['enroll', 'enrol'];
 const fillerWords = ['in', 'into', 'the', 'program', 'programme'];
 
@@ -92,12 +95,16 @@ const EnrollOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, context,
               title: program.display,
               subtitle: t('omnibarEnrolledSince', 'Enrolled since {{date}}', {
                 date: formatDate(parseDate(enrollment.dateEnrolled)),
+                interpolation: plainText,
               }),
               target: form({ programEnrollmentId: enrollment.uuid }),
             }
           : {
               id: program.uuid,
-              title: t('omnibarEnrollIn', 'Enroll in {{program}}', { program: program.display }),
+              title: t('omnibarEnrollIn', 'Enroll in {{program}}', {
+                program: program.display,
+                interpolation: plainText,
+              }),
               subtitle: t('omnibarOpenEnrollmentForm', 'Open the program enrollment form'),
               target: form({ programUuid: program.uuid }),
             };
