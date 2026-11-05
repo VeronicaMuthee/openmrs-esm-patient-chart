@@ -105,6 +105,20 @@ describe('EnrollOmnibarProvider', () => {
     expect(result.target).toMatchObject({ workspaceProps: { programEnrollmentId: 'enrollment' } });
   });
 
+  it('shows an enrollment without a date as enrolled, still listing the other programs', () => {
+    mockUseEnrollments.mockReturnValue(
+      enrollmentsReturn([{ uuid: 'enrollment', program: hivCare, dateEnrolled: null }]),
+    );
+
+    const report = reportFor('hiv');
+
+    expect(report.status).toBe('ready');
+    expect(report.results.map((result) => [result.title, result.subtitle])).toEqual([
+      ['HIV Care and Treatment', 'Enrolled'],
+      ['Enroll in HIV Differentiated Care', 'Open the program enrollment form'],
+    ]);
+  });
+
   it('shows a program’s name as written, without HTML-escaping it', () => {
     mockUseAvailablePrograms.mockReturnValue({
       data: [{ ...hivCare, uuid: 'prep', display: 'HIV Preventative Services (PEP/PrEP)' }],

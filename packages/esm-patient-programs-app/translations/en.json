@@ -36,6 +36,7 @@
       "label": "Enroll"
     }
   },
+  "omnibarEnrolled": "Enrolled",
   "omnibarEnrolledSince": "Enrolled since {{date}}",
   "omnibarEnrollGroup": "Programs",
   "omnibarEnrollIn": "Enroll in {{program}}",

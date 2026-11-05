@@ -93,10 +93,13 @@ const EnrollOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, context,
           ? {
               id: program.uuid,
               title: program.display,
-              subtitle: t('omnibarEnrolledSince', 'Enrolled since {{date}}', {
-                date: formatDate(parseDate(enrollment.dateEnrolled)),
-                interpolation: plainText,
-              }),
+              // OpenMRS allows an enrollment without a date; the Programs widget shows "--" for it
+              subtitle: enrollment.dateEnrolled
+                ? t('omnibarEnrolledSince', 'Enrolled since {{date}}', {
+                    date: formatDate(parseDate(enrollment.dateEnrolled)),
+                    interpolation: plainText,
+                  })
+                : t('omnibarEnrolled', 'Enrolled'),
               target: form({ programEnrollmentId: enrollment.uuid }),
             }
           : {
