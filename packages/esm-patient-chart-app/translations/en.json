@@ -120,6 +120,7 @@
     "visit": {
       "aliases": "visit",
       "description": "Start or end a visit for this patient",
+      "examples": "start, end",
       "label": "Visit"
     }
   },

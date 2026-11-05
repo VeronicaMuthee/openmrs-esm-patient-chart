@@ -11,6 +11,7 @@ import { useTestTypes } from '../test-orders/add-test-order/useTestTypes';
  * t('omnibarCommand.order.label', 'Order')
  * t('omnibarCommand.order.description', 'Order a drug or lab test for this patient')
  * t('omnibarCommand.order.aliases', 'order, rx, prescribe')
+ * t('omnibarCommand.order.examples', 'cbc')
  */
 
 const orderWords = ['order', 'rx', 'prescribe'];

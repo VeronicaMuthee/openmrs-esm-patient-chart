@@ -65,6 +65,7 @@
     "pending": {
       "aliases": "pending, unfilled",
       "description": "Lab orders not yet completed for this patient",
+      "examples": "labs",
       "label": "Pending"
     }
   },

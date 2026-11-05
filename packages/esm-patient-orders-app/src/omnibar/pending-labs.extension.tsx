@@ -9,6 +9,7 @@ import { ORDER_TYPES } from '../constants/order-types';
  * t('omnibarCommand.pending.label', 'Pending')
  * t('omnibarCommand.pending.description', 'Lab orders not yet completed for this patient')
  * t('omnibarCommand.pending.aliases', 'pending, unfilled')
+ * t('omnibarCommand.pending.examples', 'labs')
  */
 
 const pendingWords = ['pending', 'unfilled', 'outstanding'];

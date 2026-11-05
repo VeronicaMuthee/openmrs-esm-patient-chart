@@ -9,6 +9,7 @@ import { type Program } from '../types';
  * t('omnibarCommand.enroll.label', 'Enroll')
  * t('omnibarCommand.enroll.description', 'Enroll this patient in a program')
  * t('omnibarCommand.enroll.aliases', 'enroll, enrol')
+ * t('omnibarCommand.enroll.examples', 'hiv')
  */
 
 // The omnibar draws row text as plain text, so HTML-escaping would show "&#x2F;" for a "/" in a name

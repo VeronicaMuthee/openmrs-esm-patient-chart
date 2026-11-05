@@ -9,6 +9,7 @@ import { type ConfigObject } from '../config-schema';
  * t('omnibarCommand.order.label', 'Order')
  * t('omnibarCommand.order.description', 'Order a drug or lab test for this patient')
  * t('omnibarCommand.order.aliases', 'order, rx, prescribe')
+ * t('omnibarCommand.order.examples', 'amox')
  */
 
 const orderWords = ['order', 'rx', 'prescribe'];

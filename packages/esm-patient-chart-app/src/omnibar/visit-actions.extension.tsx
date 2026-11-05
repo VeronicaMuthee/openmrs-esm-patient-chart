@@ -7,6 +7,7 @@ import { isServerUnreachable, type OmnibarProviderProps, type OmnibarResult } fr
  * t('omnibarCommand.visit.label', 'Visit')
  * t('omnibarCommand.visit.description', 'Start or end a visit for this patient')
  * t('omnibarCommand.visit.aliases', 'visit')
+ * t('omnibarCommand.visit.examples', 'start, end')
  */
 
 const startWords = ['start', 'new', 'begin', 'add', 'open'];

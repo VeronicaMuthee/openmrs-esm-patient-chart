@@ -33,6 +33,7 @@
     "enroll": {
       "aliases": "enroll, enrol",
       "description": "Enroll this patient in a program",
+      "examples": "hiv",
       "label": "Enroll"
     }
   },

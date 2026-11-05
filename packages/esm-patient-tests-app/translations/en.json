@@ -51,6 +51,7 @@
     "order": {
       "aliases": "order, rx, prescribe",
       "description": "Order a drug or lab test for this patient",
+      "examples": "cbc",
       "label": "Order"
     }
   },
