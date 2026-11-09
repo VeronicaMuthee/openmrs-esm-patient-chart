@@ -96,7 +96,7 @@ const VisitActionsOmnibarProvider: React.FC<OmnibarProviderProps> = ({ query, co
           workspaceProps: { openedFrom: 'patient-chart-start-visit' },
           windowProps,
           // A visit-less group, as launchStartVisitWorkspace launches, so the chart's group relaunches
-          groupProps: { ...windowProps, showPatientBanner: 'tabletOnly' },
+          groupProps: { patient, patientUuid, activeVisit: null, showPatientBanner: 'tabletOnly' },
           requiresOpenGroup: { workspaceName: 'start-visit-workspace-form', patientUuid },
         },
       });

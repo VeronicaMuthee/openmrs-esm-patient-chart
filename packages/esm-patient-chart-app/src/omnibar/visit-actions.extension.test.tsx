@@ -68,7 +68,7 @@ describe('VisitActionsOmnibarProvider', () => {
       workspaceName: 'start-visit-workspace-form',
       workspaceProps: { openedFrom: 'patient-chart-start-visit' },
       windowProps: { patient: mockPatient, patientUuid, visitContext: null },
-      groupProps: { patient: mockPatient, patientUuid, visitContext: null, showPatientBanner: 'tabletOnly' },
+      groupProps: { patient: mockPatient, patientUuid, activeVisit: null, showPatientBanner: 'tabletOnly' },
       requiresOpenGroup: { workspaceName: 'start-visit-workspace-form', patientUuid },
     });
   });

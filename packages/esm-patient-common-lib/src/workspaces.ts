@@ -17,7 +17,7 @@ import { useSystemVisitSetting } from './useSystemVisitSetting';
 export interface PatientWorkspaceGroupProps {
   patient: fhir.Patient;
   patientUuid: string;
-  visitContext: Visit;
+  activeVisit: Visit;
   /**
    * When the workspaces of this group render the patient banner themselves. The patient chart has its own
    * patient header on desktop, so every group props object it builds sets `'tabletOnly'` (required here so
@@ -42,7 +42,7 @@ export type PatientBannerGroupProps = Partial<Pick<PatientWorkspaceGroupProps, '
  * `getPatientAndVisitProps`).
  */
 export type SharedWorkspaceGroupProps = PatientBannerGroupProps &
-  Partial<Pick<PatientWorkspaceGroupProps, 'patient' | 'patientUuid' | 'visitContext'>>;
+  Partial<Pick<PatientWorkspaceGroupProps, 'patient' | 'patientUuid' | 'activeVisit'>>;
 
 /**
  * Whether a workspace should render the patient banner itself, as asked for by its workspace group.
@@ -113,15 +113,15 @@ export function getPatientAndVisitProps(
   if (patient || patientUuid) {
     return { patient, patientUuid: patientUuid ?? patient?.id, visitContext };
   }
-  return { patient: groupProps?.patient, patientUuid: groupProps?.patientUuid, visitContext: groupProps?.visitContext };
+  return { patient: groupProps?.patient, patientUuid: groupProps?.patientUuid, visitContext: groupProps?.activeVisit };
 }
 
 /**
  * Converts the group props of the patient chart into window props.
  */
 function groupPropsToWindowProps(groupProps: PatientWorkspaceGroupProps): PatientWorkspaceWindowProps {
-  const { patient, patientUuid, visitContext } = groupProps;
-  return { patient, patientUuid, visitContext };
+  const { patient, patientUuid, activeVisit } = groupProps;
+  return { patient, patientUuid, visitContext: activeVisit };
 }
 
 /**
@@ -131,7 +131,7 @@ function groupPropsToWindowProps(groupProps: PatientWorkspaceGroupProps): Patien
  *
  * The group props are used rather than the latest store values because the window props of an open
  * window are compared (shallowly) with the window props of every later launch into that window, and
- * an incompatible launch prompts the user to close the window. The store's `patient` / `visitContext`
+ * an incompatible launch prompts the user to close the window. The store's `patient` / `activeVisit`
  * objects are replaced on every revalidation, while the group props stay the same until the
  * patient or visit changes, so reading the group props keeps launches compatible.
  *
@@ -147,7 +147,7 @@ export function getPatientChartWindowProps(patientUuid?: string): PatientWorkspa
   return {
     patient: state?.patient ?? null,
     patientUuid: state?.patientUuid ?? patientUuid ?? null,
-    visitContext: state?.visitContext ?? null,
+    visitContext: state?.activeVisit ?? null,
   };
 }
 
@@ -250,15 +250,15 @@ export function useActionMenuButtonLaunchProps<T extends object>(
 }
 
 export function useStartVisitIfNeeded(patientUuid: string) {
-  const { visitContext } = usePatientChartStore(patientUuid);
+  const { activeVisit } = usePatientChartStore(patientUuid);
   const { systemVisitEnabled } = useSystemVisitSetting();
 
   const startVisitIfNeeded = useCallback(async (): Promise<boolean> => {
-    if (!systemVisitEnabled || visitContext) {
+    if (!systemVisitEnabled || activeVisit) {
       return true;
     } else {
       return new Promise<boolean>((resolve) => {
-        // Setting a new visit context makes the patient chart relaunch its workspace group, which closes
+        // Setting a new active visit makes the patient chart relaunch its workspace group, which closes
         // any workspace opened before the relaunch, possibly the one that asked. So a started visit
         // resolves only once the workspace group has it, waiting on the store rather than on the caller.
         const resolveOnceWorkspaceGroupHasVisit = () => whenWorkspaceGroupHasVisit(patientUuid, () => resolve(true));
@@ -274,6 +274,6 @@ export function useStartVisitIfNeeded(patientUuid: string) {
         });
       });
     }
-  }, [visitContext, systemVisitEnabled, patientUuid]);
+  }, [activeVisit, systemVisitEnabled, patientUuid]);
   return startVisitIfNeeded;
 }
