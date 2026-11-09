@@ -95,6 +95,21 @@
         "skipIdentifierQueries": true,
         "command": { "id": "order", "aliases": ["order", "rx", "prescribe"] }
       }
+    },
+    {
+      "name": "renew-order-omnibar-provider",
+      "slot": "omnibar-providers-slot",
+      "component": "renewOrderOmnibarProvider",
+      "privileges": ["Add Orders"],
+      "meta": {
+        "lane": "navigate",
+        "scopes": ["patient"],
+        "order": 9,
+        "contract": 1,
+        "defaultInChart": true,
+        "skipIdentifierQueries": true,
+        "command": { "id": "renew", "aliases": ["renew"] }
+      }
     }
   ],
   "workspaces2": [

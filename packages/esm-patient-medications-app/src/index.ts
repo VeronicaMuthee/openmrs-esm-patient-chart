@@ -59,3 +59,11 @@ export const drugOrderOmnibarProvider = getAsyncLifecycle(
     })),
   { featureName: 'drug-order-omnibar-provider', moduleName },
 );
+
+export const renewOrderOmnibarProvider = getAsyncLifecycle(
+  () =>
+    import('./omnibar/renew-order.extension').then(({ default: Provider }) => ({
+      default: withProviderBoundary(Provider, 'renew-order-omnibar-provider'),
+    })),
+  { featureName: 'renew-order-omnibar-provider', moduleName },
+);
